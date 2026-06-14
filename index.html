@@ -300,6 +300,32 @@
       letter-spacing: 0.12em;
     }
 
+    /* ── Music toggle ── */
+    .music-btn {
+      position: fixed;
+      bottom: 1.2rem;
+      right: 1.2rem;
+      z-index: 900;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      color: rgba(255,255,255,0.75);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+      touch-action: manipulation;
+    }
+
+    .music-btn:hover { background: rgba(255,255,255,0.2); }
+
+    .music-btn svg { width: 18px; height: 18px; fill: currentColor; }
+
     /* ── Footer ── */
     .footer {
       text-align: center;
@@ -324,6 +350,14 @@
     </div>
     <div class="scroll-hint">scroll</div>
   </section>
+
+  <audio id="bgm" loop src="still-great-abbynoise-main-version-40890-01-57.mp3" preload="none"></audio>
+  <button class="music-btn" id="music-btn" aria-label="Play music">
+    <!-- play icon shown when paused -->
+    <svg id="icon-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+    <!-- sound icon shown when playing -->
+    <svg id="icon-sound" viewBox="0 0 24 24" style="display:none"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3A4.5 4.5 0 0 0 14 7.97v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+  </button>
 
   <main class="gallery">
     <p style="text-align:center;font-size:0.7rem;letter-spacing:0.15em;text-transform:uppercase;color:rgba(255,255,255,0.35);margin-bottom:1rem;">Tap to open</p>
@@ -539,6 +573,43 @@
     lightbox.addEventListener('touchend', e => {
       const dx = e.changedTouches[0].clientX - touchX;
       if (Math.abs(dx) > 50) { didSwipe = true; dx < 0 ? next() : prev(); }
+    });
+
+    // ── Background music ──
+    const bgm       = document.getElementById('bgm');
+    const musicBtn  = document.getElementById('music-btn');
+    const iconPlay  = document.getElementById('icon-play');
+    const iconSound = document.getElementById('icon-sound');
+    let musicStarted = false;
+
+    bgm.volume = 0.5;
+
+    function setMusicIcon(playing) {
+      iconPlay.style.display  = playing ? 'none'  : 'block';
+      iconSound.style.display = playing ? 'block' : 'none';
+    }
+
+    function startMusic() {
+      if (musicStarted) return;
+      musicStarted = true;
+      bgm.play().then(() => setMusicIcon(true)).catch(() => {});
+    }
+
+    // Auto-start on first user interaction anywhere on the page
+    ['click', 'touchstart', 'keydown'].forEach(evt =>
+      document.addEventListener(evt, startMusic, { once: true, passive: true })
+    );
+
+    // Button toggles play/pause
+    musicBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      if (bgm.paused) {
+        musicStarted = true;
+        bgm.play().then(() => setMusicIcon(true)).catch(() => {});
+      } else {
+        bgm.pause();
+        setMusicIcon(false);
+      }
     });
   </script>
   <script src="/tim-signature.js"></script>
