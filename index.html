@@ -158,6 +158,12 @@
       filter: brightness(1.08);
     }
 
+    /* Dark video placeholder while loading */
+    .gallery-item.is-video {
+      background: linear-gradient(135deg, #1a2d3d 0%, #0f1f2e 100%);
+      min-height: 120px;
+    }
+
     /* Video play badge */
     .play-badge {
       position: absolute;
@@ -280,10 +286,10 @@
     .lb-next { right: 0; border-radius: 4px 0 0 4px; }
     .lb-prev:hover, .lb-next:hover { background: rgba(255,255,255,0.18); }
 
-    /* Hide nav arrows when showing video on mobile — controls handle seeking */
+    /* Hide nav arrows completely when showing video — swipe to navigate */
     .lightbox.is-video .lb-prev,
     .lightbox.is-video .lb-next {
-      opacity: 0.4;
+      display: none;
     }
 
     .lb-counter {
@@ -442,10 +448,12 @@
       el.className = 'gallery-item';
 
       if (item.type === 'video') {
+        el.classList.add('is-video');
         const vid = document.createElement('video');
         vid.muted = true;
         vid.loop  = true;
         vid.setAttribute('playsinline', '');
+        vid.setAttribute('webkit-playsinline', '');
         vid.setAttribute('preload', 'metadata');
         vid.src = mediaSrc(i);
 
