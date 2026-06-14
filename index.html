@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fun Foiling</title>
+
+  <link rel="apple-touch-icon" href="images/IMG_6903.png">
+  <meta name="apple-mobile-web-app-title" content="Fun Foiling">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+
+  <meta property="og:type"        content="website">
+  <meta property="og:title"       content="Fun Foiling">
+  <meta property="og:description" content="Wing foiling · June 2026">
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body { overflow-x: hidden; }
+
+    html .tim-sig-email { font-size: clamp(14px, 4.5vw, 46px); }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #0f1923;
+      color: #fff;
+    }
+
+    /* ── Cover ── */
+    .cover {
+      position: relative;
+      height: 100svh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      padding-bottom: 10vh;
+      overflow: hidden;
+    }
+
+    .cover-img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center 25%;
+    }
+
+    .cover-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom,
+        rgba(0,0,0,0.1) 0%,
+        rgba(0,0,0,0.45) 65%,
+        rgba(15,25,35,1) 100%);
+    }
+
+    .cover-text {
+      position: relative;
+      text-align: center;
+    }
+
+    .cover-text h1 {
+      font-size: clamp(2.4rem, 9vw, 5.5rem);
+      font-weight: 300;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #fff;
+    }
+
+    .cover-text p {
+      font-size: clamp(0.8rem, 2.5vw, 1rem);
+      letter-spacing: 0.25em;
+      color: rgba(255,255,255,0.65);
+      margin-top: 0.6rem;
+      text-transform: uppercase;
+    }
+
+    .scroll-hint {
+      position: relative;
+      margin-top: 2.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      color: rgba(255,255,255,0.4);
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+    }
+
+    .scroll-hint::after {
+      content: '';
+      display: block;
+      width: 1px;
+      height: 36px;
+      background: rgba(255,255,255,0.3);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.25; transform: scaleY(0.9); }
+      50%       { opacity: 0.8;  transform: scaleY(1.1); }
+    }
+
+    /* ── Gallery ── */
+    .gallery {
+      padding: 0 3px 4rem;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .gallery-grid {
+      columns: 2;
+      column-gap: 3px;
+    }
+
+    @media (min-width: 600px)  { .gallery-grid { columns: 3; } }
+    @media (min-width: 1024px) { .gallery-grid { columns: 4; column-gap: 4px; } }
+
+    .gallery-item {
+      break-inside: avoid;
+      margin-bottom: 3px;
+      overflow: hidden;
+      cursor: pointer;
+      background: #1a2530;
+      display: block;
+      position: relative;
+    }
+
+    @media (min-width: 1024px) { .gallery-item { margin-bottom: 4px; } }
+
+    .gallery-item img,
+    .gallery-item video {
+      width: 100%;
+      height: auto;
+      display: block;
+      transition: transform 0.35s ease, filter 0.35s ease;
+    }
+
+    .gallery-item:hover img,
+    .gallery-item:hover video {
+      transform: scale(1.03);
+      filter: brightness(1.08);
+    }
+
+    /* Video play badge */
+    .play-badge {
+      position: absolute;
+      bottom: 8px;
+      right: 8px;
+      width: 32px;
+      height: 32px;
+      background: rgba(0,0,0,0.55);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+    }
+
+    .play-badge svg {
+      width: 14px;
+      height: 14px;
+      fill: rgba(255,255,255,0.9);
+      margin-left: 2px;
+    }
+
+    @keyframes tap-pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(255,255,255,0); }
+      50%       { box-shadow: 0 0 20px 6px rgba(255,255,255,0.4); }
+    }
+    .tap-hint {
+      overflow: visible;
+      animation: tap-pulse 1.6s ease-in-out infinite;
+    }
+
+    /* ── Lightbox ── */
+    .lightbox {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.96);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      overscroll-behavior: none;
+      overflow: hidden;
+      padding-bottom: 36px;
+    }
+
+    .lightbox.open { display: flex; }
+
+    #lb-img {
+      max-width: calc(100vw - 88px);
+      max-height: calc(100svh - 36px);
+      object-fit: contain;
+      user-select: none;
+      -webkit-user-drag: none;
+      border-radius: 2px;
+    }
+
+    #lb-video {
+      max-width: calc(100vw - 88px);
+      max-height: calc(100svh - 36px);
+      object-fit: contain;
+      border-radius: 2px;
+      outline: none;
+    }
+
+    @media (max-width: 500px) {
+      #lb-img, #lb-video {
+        max-width: 100vw;
+        max-height: calc(100svh - 36px);
+      }
+    }
+
+    /* Landscape mobile */
+    @media (orientation: landscape) and (max-height: 600px) {
+      #lb-img, #lb-video {
+        max-width: 100vw !important;
+        max-height: calc(100dvh - 36px) !important;
+      }
+      .lb-prev, .lb-next {
+        background: rgba(0,0,0,0.25);
+        padding: 0.8rem 0.5rem;
+      }
+    }
+
+    .lb-close {
+      position: fixed;
+      top: 0.75rem;
+      right: 0.75rem;
+      background: rgba(255,255,255,0.08);
+      border: none;
+      color: rgba(255,255,255,0.85);
+      font-size: 1.4rem;
+      line-height: 1;
+      cursor: pointer;
+      z-index: 1001;
+      padding: 0.5rem 0.65rem;
+      border-radius: 4px;
+      touch-action: manipulation;
+    }
+
+    .lb-close:hover { background: rgba(255,255,255,0.18); }
+
+    .lb-prev, .lb-next {
+      position: fixed;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(255,255,255,0.08);
+      border: none;
+      color: rgba(255,255,255,0.85);
+      font-size: 2rem;
+      line-height: 1;
+      cursor: pointer;
+      z-index: 1001;
+      padding: 1.2rem 0.7rem;
+      touch-action: manipulation;
+    }
+
+    .lb-prev { left: 0;  border-radius: 0 4px 4px 0; }
+    .lb-next { right: 0; border-radius: 4px 0 0 4px; }
+    .lb-prev:hover, .lb-next:hover { background: rgba(255,255,255,0.18); }
+
+    /* Hide nav arrows when showing video on mobile — controls handle seeking */
+    .lightbox.is-video .lb-prev,
+    .lightbox.is-video .lb-next {
+      opacity: 0.4;
+    }
+
+    .lb-counter {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 36px;
+      line-height: 36px;
+      text-align: center;
+      background: rgba(0,0,0,0.75);
+      color: rgba(255,255,255,0.5);
+      font-size: 0.75rem;
+      letter-spacing: 0.12em;
+    }
+
+    /* ── Footer ── */
+    .footer {
+      text-align: center;
+      padding: 2rem 1rem 3rem;
+      color: rgba(255,255,255,0.2);
+      font-size: 0.75rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+  </style>
+</head>
+<body>
+
+  <section class="cover">
+    <img class="cover-img" src="images/IMG_6903.png" alt="Wing foiling">
+    <div class="cover-overlay"></div>
+    <div class="cover-text">
+      <h1>Fun Foiling</h1>
+      <p>June 2026</p>
+    </div>
+    <div class="scroll-hint">scroll</div>
+  </section>
+
+  <main class="gallery">
+    <p style="text-align:center;font-size:0.7rem;letter-spacing:0.15em;text-transform:uppercase;color:rgba(255,255,255,0.35);margin-bottom:1rem;">Tap to open</p>
+    <div class="gallery-grid" id="grid"></div>
+  </main>
+
+  <footer class="footer">
+    <span id="media-count"></span>
+    <br><br>
+    <a href="mailto:hello@timjhales.com"
+       data-tim-signature
+       data-email="hello@timjhales.com"
+       data-name="Tim"
+       data-signature="/Tim-no-dot.png"
+       data-intensity="standard"
+       aria-label="Web design by Tim — click for contact"
+       style="display:inline-flex;align-items:center;gap:6px;opacity:0.85;text-decoration:none;">
+      <span style="color:#52D4CC;opacity:0.6;font-size:10px;text-transform:uppercase;letter-spacing:0.2em;font-family:-apple-system,sans-serif;">Web design by</span>
+      <img src="/Shortsignature.png" alt="Tim" style="height:20px;width:auto;">
+    </a>
+  </footer>
+
+  <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Media viewer">
+    <button class="lb-close" id="lb-close" aria-label="Close">&#x2715;</button>
+    <button class="lb-prev"  id="lb-prev"  aria-label="Previous">&#x2039;</button>
+    <img    id="lb-img"   src="" alt="" style="display:none">
+    <video  id="lb-video" playsinline controls style="display:none"></video>
+    <button class="lb-next"  id="lb-next"  aria-label="Next">&#x203A;</button>
+    <div    class="lb-counter" id="lb-counter"></div>
+  </div>
+
+  <script>
+    const media = [
+      { file: 'IMG_6848.mov', type: 'video' },
+      { file: 'IMG_6854.mov', type: 'video' },
+      { file: 'IMG_6873.png', type: 'image' },
+      { file: 'IMG_6879.mov', type: 'video' },
+      { file: 'IMG_6881.png', type: 'image' },
+      { file: 'IMG_6882.png', type: 'image' },
+      { file: 'IMG_6884.png', type: 'image' },
+      { file: 'IMG_6885.mov', type: 'video' },
+      { file: 'IMG_6887.png', type: 'image' },
+      { file: 'IMG_6888.png', type: 'image' },
+      { file: 'IMG_6893.png', type: 'image' },
+      { file: 'IMG_6899.png', type: 'image' },
+      { file: 'IMG_6900.mov', type: 'video' },
+      { file: 'IMG_6901.mov', type: 'video' },
+      { file: 'IMG_6903.png', type: 'image' },
+      { file: 'IMG_6904.png', type: 'image' },
+      { file: 'IMG_6905.mov', type: 'video' },
+      { file: 'IMG_6906.png', type: 'image' },
+      { file: 'IMG_6908.png', type: 'image' },
+      { file: 'IMG_6910.mov', type: 'video' },
+      { file: 'IMG_6911.mov', type: 'video' },
+      { file: 'IMG_6912.mov', type: 'video' },
+      { file: 'IMG_6913.mov', type: 'video' },
+      { file: 'IMG_6914.mov', type: 'video' },
+      { file: 'IMG_6918.mov', type: 'video' },
+      { file: 'IMG_6922.mov', type: 'video' },
+      { file: 'IMG_6926.mov', type: 'video' },
+    ];
+
+    const photoCount = media.filter(m => m.type === 'image').length;
+    const videoCount = media.filter(m => m.type === 'video').length;
+    document.getElementById('media-count').textContent =
+      `${photoCount} photo${photoCount !== 1 ? 's' : ''} · ${videoCount} video${videoCount !== 1 ? 's' : ''}`;
+
+    const grid      = document.getElementById('grid');
+    const lightbox  = document.getElementById('lightbox');
+    const lbImg     = document.getElementById('lb-img');
+    const lbVideo   = document.getElementById('lb-video');
+    const lbCounter = document.getElementById('lb-counter');
+    let current = 0;
+
+    function mediaSrc(index) {
+      return `images/${encodeURIComponent(media[index].file)}`;
+    }
+
+    // Build masonry grid
+    media.forEach((item, i) => {
+      const el = document.createElement('div');
+      el.className = 'gallery-item';
+
+      if (item.type === 'video') {
+        const vid = document.createElement('video');
+        vid.muted = true;
+        vid.loop  = true;
+        vid.setAttribute('playsinline', '');
+        vid.setAttribute('preload', 'metadata');
+        vid.src = mediaSrc(i);
+
+        const badge = document.createElement('div');
+        badge.className = 'play-badge';
+        badge.innerHTML = `<svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>`;
+
+        el.appendChild(vid);
+        el.appendChild(badge);
+      } else {
+        const img = document.createElement('img');
+        img.src      = mediaSrc(i);
+        img.alt      = `Foiling photo ${i + 1}`;
+        img.loading  = 'lazy';
+        img.decoding = 'async';
+        el.appendChild(img);
+      }
+
+      if (i === 0) el.classList.add('tap-hint');
+
+      el.addEventListener('click', () => {
+        grid.querySelectorAll('.tap-hint').forEach(e => e.classList.remove('tap-hint'));
+        open(i);
+      });
+
+      grid.appendChild(el);
+    });
+
+    // Pause all gallery videos, play only the one in view
+    const galleryVids = [...grid.querySelectorAll('video')];
+    const vidObserver = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        const v = entry.target;
+        if (entry.isIntersecting) {
+          v.play().catch(() => {});
+        } else {
+          v.pause();
+        }
+      });
+    }, { threshold: 0.4 });
+    galleryVids.forEach(v => vidObserver.observe(v));
+
+    function open(index) {
+      current = index;
+      lightbox.classList.add('open');
+      document.body.style.overflow = 'hidden';
+      showMedia();
+    }
+
+    function closeLightbox() {
+      lightbox.classList.remove('open');
+      lightbox.classList.remove('is-video');
+      document.body.style.overflow = '';
+      lbImg.src   = '';
+      lbImg.style.display   = 'none';
+      lbVideo.pause();
+      lbVideo.src = '';
+      lbVideo.style.display = 'none';
+    }
+
+    function showMedia() {
+      const item = media[current];
+      const src  = mediaSrc(current);
+      lbCounter.textContent = `${current + 1} – ${media.length}`;
+
+      lbVideo.pause();
+
+      if (item.type === 'video') {
+        lbImg.style.display   = 'none';
+        lbImg.src = '';
+        lbVideo.style.display = 'block';
+        lbVideo.src = src;
+        lbVideo.load();
+        lightbox.classList.add('is-video');
+      } else {
+        lbVideo.style.display = 'none';
+        lbVideo.src = '';
+        lbImg.style.display   = 'block';
+        lightbox.classList.remove('is-video');
+
+        // Show thumbnail instantly while full-res loads
+        const thumb = grid.querySelectorAll('.gallery-item img')[
+          media.slice(0, current).filter(m => m.type === 'image').length
+        ];
+        if (thumb && thumb.complete && thumb.src) lbImg.src = thumb.src;
+
+        const full = new Image();
+        full.onload = () => { if (lbImg.isConnected) lbImg.src = src; };
+        full.src = src;
+      }
+
+      // Preload neighbours
+      [-1, 1, -2, 2].forEach(offset => {
+        const i = ((current + offset) % media.length + media.length) % media.length;
+        if (media[i].type === 'image') {
+          const pre = new Image();
+          pre.src = mediaSrc(i);
+        }
+      });
+    }
+
+    function prev() { current = (current - 1 + media.length) % media.length; showMedia(); }
+    function next() { current = (current + 1) % media.length; showMedia(); }
+
+    document.getElementById('lb-close').addEventListener('click', closeLightbox);
+    document.getElementById('lb-prev').addEventListener('click', prev);
+    document.getElementById('lb-next').addEventListener('click', next);
+
+    let didSwipe = false;
+    lightbox.addEventListener('click', e => {
+      if (didSwipe) { didSwipe = false; return; }
+      if (e.target === lightbox) closeLightbox();
+    });
+
+    document.addEventListener('keydown', e => {
+      if (!lightbox.classList.contains('open')) return;
+      if (e.key === 'ArrowLeft')  prev();
+      if (e.key === 'ArrowRight') next();
+      if (e.key === 'Escape')     closeLightbox();
+    });
+
+    // Touch swipe
+    let touchX = 0;
+    lightbox.addEventListener('touchstart', e => { touchX = e.touches[0].clientX; didSwipe = false; }, { passive: true });
+    lightbox.addEventListener('touchend', e => {
+      const dx = e.changedTouches[0].clientX - touchX;
+      if (Math.abs(dx) > 50) { didSwipe = true; dx < 0 ? next() : prev(); }
+    });
+  </script>
+  <script src="/tim-signature.js"></script>
+</body>
+</html>
