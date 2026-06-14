@@ -47,6 +47,14 @@
       object-position: center 25%;
     }
 
+    .cover-video {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
     .cover-overlay {
       position: absolute;
       inset: 0;
@@ -301,7 +309,9 @@
 <body>
 
   <section class="cover">
-    <img class="cover-img" src="images/IMG_6903.png" alt="Wing foiling">
+    <video class="cover-video" autoplay muted loop playsinline preload="metadata" poster="images/IMG_6903.png">
+      <source src="images/IMG_6910.mov">
+    </video>
     <div class="cover-overlay"></div>
     <div class="cover-text">
       <h1>Fun Foiling</h1>
