@@ -393,7 +393,8 @@
     <button class="lb-close" id="lb-close" aria-label="Close">&#x2715;</button>
     <button class="lb-prev"  id="lb-prev"  aria-label="Previous">&#x2039;</button>
     <img    id="lb-img"   src="" alt="" style="display:none">
-    <video  id="lb-video" playsinline controls style="display:none"></video>
+    <video  id="lb-video" playsinline webkit-playsinline style="display:none"></video>
+    <div    id="lb-tap-icon" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;z-index:1002;opacity:0;transition:opacity 0.15s;"></div>
     <button class="lb-next"  id="lb-next"  aria-label="Next">&#x203A;</button>
     <div    class="lb-counter" id="lb-counter"></div>
   </div>
@@ -571,6 +572,26 @@
     lightbox.addEventListener('touchend', e => {
       const dx = e.changedTouches[0].clientX - touchX;
       if (Math.abs(dx) > 50) { didSwipe = true; dx < 0 ? next() : prev(); }
+    });
+
+    // ── Lightbox video — tap to play/pause ──
+    const tapIcon = document.getElementById('lb-tap-icon');
+    let tapIconTimer;
+
+    function showTapIcon(playing) {
+      tapIcon.style.display = 'flex';
+      tapIcon.innerHTML = playing
+        ? `<svg width="64" height="64" viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="30" fill="rgba(0,0,0,0.45)"/><rect x="22" y="18" width="7" height="28" rx="2" fill="white"/><rect x="35" y="18" width="7" height="28" rx="2" fill="white"/></svg>`
+        : `<svg width="64" height="64" viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="30" fill="rgba(0,0,0,0.45)"/><polygon points="24,16 52,32 24,48" fill="white"/></svg>`;
+      tapIcon.style.opacity = '1';
+      clearTimeout(tapIconTimer);
+      tapIconTimer = setTimeout(() => { tapIcon.style.opacity = '0'; }, 700);
+    }
+
+    lbVideo.addEventListener('click', e => {
+      e.stopPropagation();
+      if (lbVideo.paused) { lbVideo.play(); showTapIcon(true); }
+      else                { lbVideo.pause(); showTapIcon(false); }
     });
 
     // ── Hero video — nudge play on first interaction for iOS ──
