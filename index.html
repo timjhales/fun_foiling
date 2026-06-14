@@ -150,13 +150,13 @@
       height: auto;
       display: block;
       transition: transform 0.35s ease, filter 0.35s ease;
-      filter: brightness(1.2);
+      filter: brightness(1.3);
     }
 
     .gallery-item:hover img,
     .gallery-item:hover video {
       transform: scale(1.03);
-      filter: brightness(1.35);
+      filter: brightness(1.45);
     }
 
     /* Dark video placeholder while loading */
@@ -452,19 +452,18 @@
 
       if (item.type === 'video') {
         el.classList.add('is-video');
-        const vid = document.createElement('video');
-        vid.muted = true;
-        vid.loop  = true;
-        vid.setAttribute('playsinline', '');
-        vid.setAttribute('webkit-playsinline', '');
-        vid.setAttribute('preload', 'metadata');
-        vid.src = mediaSrc(i);
+        const poster = item.file.replace('.mov', '-poster.jpg');
+        const img = document.createElement('img');
+        img.src     = `images/${encodeURIComponent(poster)}`;
+        img.alt     = `Foiling video ${i + 1}`;
+        img.loading = 'lazy';
+        img.decoding = 'async';
 
         const badge = document.createElement('div');
         badge.className = 'play-badge';
         badge.innerHTML = `<svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>`;
 
-        el.appendChild(vid);
+        el.appendChild(img);
         el.appendChild(badge);
       } else {
         const img = document.createElement('img');
@@ -485,19 +484,6 @@
       grid.appendChild(el);
     });
 
-    // Pause all gallery videos, play only the one in view
-    const galleryVids = [...grid.querySelectorAll('video')];
-    const vidObserver = new IntersectionObserver(entries => {
-      entries.forEach(entry => {
-        const v = entry.target;
-        if (entry.isIntersecting) {
-          v.play().catch(() => {});
-        } else {
-          v.pause();
-        }
-      });
-    }, { threshold: 0.4 });
-    galleryVids.forEach(v => vidObserver.observe(v));
 
     function open(index) {
       current = index;
