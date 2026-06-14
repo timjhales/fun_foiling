@@ -340,8 +340,8 @@
 <body>
 
   <section class="cover">
-    <video class="cover-video" autoplay muted loop playsinline webkit-playsinline preload="auto" poster="images/IMG_6903.png">
-      <source src="images/IMG_6910.mov" type="video/mp4">
+    <video id="cover-video" class="cover-video" autoplay muted loop playsinline webkit-playsinline preload="auto" poster="images/IMG_6903.png">
+      <source src="images/IMG_6910.mov">
     </video>
     <div class="cover-overlay"></div>
     <div class="cover-text">
@@ -575,6 +575,13 @@
       const dx = e.changedTouches[0].clientX - touchX;
       if (Math.abs(dx) > 50) { didSwipe = true; dx < 0 ? next() : prev(); }
     });
+
+    // ── Hero video — nudge play on first interaction for iOS ──
+    const coverVid = document.getElementById('cover-video');
+    if (coverVid) {
+      coverVid.play().catch(() => {});
+      document.addEventListener('touchstart', () => coverVid.play().catch(() => {}), { once: true, passive: true });
+    }
 
     // ── Background music ──
     const bgm       = document.getElementById('bgm');
